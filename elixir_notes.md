@@ -98,3 +98,59 @@
   %{map | foo: "baz"} ```
   - This syntax only works for keys that exist in the map, to create a new key instead use `Map.put/3`
   `Map.put(map, :foo, "baz"`
+
+## Enum
+  - Enum is a set of algo for enumerating over enumberables
+  - The `Enum` module includes over 70 functions. All collections except tuples are enumerables.
+ ### Common Enum Functions
+  - `all?/2` we supply a function to apply to our collection's items, the entire collection must evaluate to `true` otherwise `false` will be returned.
+  ```elixir 
+  Enum.all?(["neck", "back", "p*ssy", "crack"], fn(s) -> String.length(s) == 3 end)
+  #evaluates to false
+  Enum.all?(["neck", "back", "p*ssy", "crack"], fn(s) -> String.length(s) != 3 end)
+  #evaluated to true
+```
+  - `any?/2` will return `true` if at least one item evaluates to `true`:
+  ```elixir
+  Enum.any?(list, fn(s) -> String.length(s) == 5 end)
+  #evaluates to true
+  ```
+  - `chunk_every/2` allows you to break your collection up into smaller groups
+  ```elixir
+  Enum.chunk_every(list, 2)
+  #returns [["neck", "back"], ["p*ssy", "crack"]]
+  ```
+  - `chunk_by/2` groups a collection based on something other than size. It takes an enumerable and then a function, and when the return on that function changes, a new group is started and being the creation of the next.
+  ```elixir
+  Enum.chunk_by(list, fn(x) -> String.length(x) end)
+  #return [["neck", "back"], ["p*ssy", "crack"]]
+  ```
+  - `map.every/3` will hit every `nth` items, always hitting the first one.
+  ```elixir
+  Enum.map_every(list, 1, fn x -> "straighten your #{x}" end)
+  #returns ["straighten your neck", "straighten your back",
+ "straighten your p*ssy", "straighten your crack"]
+  ```
+  - `each/2` will iterate over a collection without returning a new value.
+  ```elixir
+  Enum.each(list, fn(s) -> IO.puts(s) end)
+  #neck
+  #back
+  #p*ssy
+  #crack
+  #returns :ok
+  ```
+  - `map/2` applies a function on each item and produces a new collection.
+  ```elixir
+  Enum.map(list, fn(x) -> "my #{x}" end)
+  #returns ["my neck", "my back", "my p*ssy", "my crack"]
+  ```
+  - `min/1` finds minimal value in the collection, `min/2` will allow you to specify a function to produce a min value if the collection is empty.
+  - `max/1` reutrn the maximal value in the collection, `max/2` will also allow you to specify a function in the case that the collection is empty.
+  - `filter/3` enables us to filter to include elements that only evaluate `true` using the provided function.
+  ```elixir
+  Enum.filter(list, fn(x)-> x == "back" end)
+  #return ["back"]
+  ```
+  
+  
