@@ -213,6 +213,9 @@
   add_one = fn x -> x +1 end
   add_one(1) #2
   ```
-
-  
+## Pattern Matching
+  - Allows us to match simple values, data structures and functions.
+### Match Operator
+  - The `=` operator is actually a match operator, comparable to the equals sign in algebra.
+ 
 
