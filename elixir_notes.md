@@ -152,5 +152,67 @@
   Enum.filter(list, fn(x)-> x == "back" end)
   #return ["back"]
   ```
+  - `reduce/3` reduces a collection down to a single value. The first argument is an optional accumulate and then a reduction function.
+  ```elixir
+  Enum.reduce(list, 0, fn(x, acc) -> x + acc end)
+  #returns 2520
+  ```
+  - `sort/1` uses Erlang's term ordering to determine the sorted order.
+  ```elixir
+  Enum.sort(list)
+  #returns [42, 69, 420, 1989]
+  ```
+  - `sort/2` allows us to sort providing a function of our own
+  ```elixir
+  listMap = [%{:val => 4}, %{:val => 1}]
+  Enum.sort(listMap, fn(x,y) -> x[:val] > y[:val] end)
+  #returns [%{val: 4}, %{val: 1}]
+  ```
+  - For convenience `sort/2` allows us to pass `:asc` or `:desc` as the sorting function
+  - `uniq/1` removed duplicates from enumerables
+  ```elxir
+  list = [1,1,1,2]
+  Enum.uniq(list)
+  #returns [1, 2]
+  ```
+  - `uniq_by/2` also removes duplicates from enumerables, but we can use a function to do uniqueness comparisons
+
+## Capture Operator &
+  - & can turn a function into  an anonymous function which can be passed as argument to other functions or be bound to a variable. 
+  - this is similar to JS
+  ```js
+  const butts =  () => {
+  return "butts"
+  }
+  ```
+  - & can capture two types of functions, 
+    1. a function with a given name and arity
+    ```elixir
+    speak = &(I.0.puts/1)
+    speak.("hello") 
+    ```
+    1. local function
+    ```elixir
+  defmodule Issues.TableFormatter do
+    def put_in_columns(data_by_columns, format) do
+	  Enum.each(data_by_columns, &put_in_one_row/1)
+    end
+
+    def put_in_one_row(fields) do
+  	   # Do some things...
+    end
+  end
+  ```
+  - The capture operator can also be used to create anonymous functions,
+  ```elixir
+  add_one = &(&1 + 1)
+  add_one.(1) #2
+  ``` 
+  is the same as
+  ```elixir
+  add_one = fn x -> x +1 end
+  add_one(1) #2
+  ```
+
   
-  
+
