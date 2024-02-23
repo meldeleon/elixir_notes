@@ -31,7 +31,7 @@
   - `"Hello #{name}"`
 ### String concatenation
   - uses the `<>` operator
-  - ```elixr
+  - ```elixir
     name = "Sean"
     "Hello " <> name``
 
@@ -39,7 +39,7 @@
 ### Lists
   - May include non-unique values
   > Elixir implements list collections as linked lists. This means that accessing the list length is an operation that runs in O(n). It is always faster to prepend rather than append
-  ```elxir
+  ```elixir
   list = [3.14, :pie, "Apple"]
   # Prepending (fast)
   ```
@@ -174,7 +174,7 @@
   ```
   - For convenience `sort/2` allows us to pass `:asc` or `:desc` as the sorting function
   - `uniq/1` removed duplicates from enumerables
-  ```elxir
+  ```elixir
   list = [1,1,1,2]
   Enum.uniq(list)
   #returns [1, 2]
@@ -197,16 +197,16 @@
     ```
     1. local function
     ```elixir
-  defmodule Issues.TableFormatter do
-    def put_in_columns(data_by_columns, format) do
-	  Enum.each(data_by_columns, &put_in_one_row/1)
-    end
+    defmodule Issues.TableFormatter do
+      def put_in_columns(data_by_columns, format) do
+	      Enum.each(data_by_columns, &put_in_one_row/1)
+      end
 
-    def put_in_one_row(fields) do
-  	   # Do some things...
+      def put_in_one_row(fields) do
+  	    # Do some things...
+      end
     end
-  end
-  ```
+    ```
   - The capture operator can also be used to create anonymous functions,
   ```elixir
   add_one = &(&1 + 1)
