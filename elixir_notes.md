@@ -42,7 +42,8 @@
   ```elxir
   list = [3.14, :pie, "Apple"]
   # Prepending (fast)
-  [ns in O(n). It is always faster to prepend rather than append
+  ```
+  - Appending is in O(n). It is always faster to prepend rather than append
   ```elixir
   list = [3.14, :pie, "Apple"]
   ["pi"| list]
@@ -94,8 +95,11 @@
   - there exists a special syntax for only atom keys
   ```map = %{foo: "bar", hello: "world"}```
   - maps provide their own syntax for updates (note, this creates a new map). Do this using the syntax `%{ mapName | atom: "value"}`
-  ``` map = %{foo: "bar", hello: "world"
-  %{map | foo: "baz"} ```
+  ```elixir 
+    map = %{foo: "bar", hello: "world"
+      %{map | foo: "baz"} 
+  ```
+
   - This syntax only works for keys that exist in the map, to create a new key instead use `Map.put/3`
   `Map.put(map, :foo, "baz"`
 
