@@ -332,4 +332,26 @@
   ...(3)> end 
   #"but this will be"
   ```
- 
+### if/unless
+  - Elixir also provides `if/2` and `unles/2` which are useful if you want to check for one condition.
+  ```elixir
+  iex(4)> if true do
+  ...(4)>   "this works"
+  ...(4)> end
+  "this works"
+  iex(5)> unless true do
+  ...(5)>   "this will never be seen"
+  ...(5)> end
+  nil
+  ```
+  - Elixir also supports `else` blocks
+  ```elixir
+  iex(1)> if nil do 
+  ...(1)>   "this won't be seen"
+  ...(1)> else
+  ...(1)>   "this will"
+  ...(1)> end 
+  #"this will"
+  ```
+  - if a variable is declared or changed inside of an `if`, `case` constructu, the declaration and change is only visible inside the construct.
+
