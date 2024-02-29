@@ -221,5 +221,115 @@
   - Allows us to match simple values, data structures and functions.
 ### Match Operator
   - The `=` operator is actually a match operator, comparable to the equals sign in algebra.
- 
+  - The match operator performs assignment when the left side of the match includes a variable. 
+  - When sides do not match a `MatchError` is raised
 
+### Pattern Matching
+  - The match operator is also useful for destructuriung more complex data types
+  ```elixir
+  {a, b, c} = {:hello, "world", 42}
+  #{:hello, "world", 42}
+  iex(2)> a
+  #:hello
+  ```
+  - This will also throw an error if the left and right hand of the matching operator do not have the same size
+  - We 
+
+
+
+
+  - We can also assert things with the match operator. The following will only match if the first element of the tuple is :ok on both the left and right sides:
+  ```elixir
+  {:ok, result} = {:ok, 13}
+  #{:ok, 13}
+  iex(6)> result 
+  #13
+  ```
+  - We can also pattern match on lists, it supports matching the `[head | tail]`
+  - Pattern matching allows developers to easily destructure data types. It is also one of the foundations of recursion in Elixir.
+
+### Pin Operator
+  - Variables in Elixir can be rebound -- but in the case when we don't want variables to be rebound, we use the pin operator `^`
+  ```elixir
+  iex(1)> x = 1 
+  #1
+  iex(2)> ^x =2
+  #** (MatchError) no match of right hand side value: 2
+  ```
+  this is equivalent to
+  ```elixir
+  iex > 1=2
+  ```
+  - we can use the pin operator inside pattern matches such as tuples or lists
+  ```elixir
+  iex(1)> x = 1
+  #1
+  iex(2)> [^x, 2, 3] = [1,2,3]
+  #[1, 2, 3]
+  ```
+  - if a variable is mention more than once in a pattern, all references must bind to the same value
+  ```elixir
+  iex(1)> {x,x} = {1,1} 
+  {1, 1}
+  iex(2)> {x,x} = {1,2}
+  ** (MatchError) no match of right hand side value: {1, 2}
+  ```
+  - if we generall do not care about a particular value in a pattern, we can bind it to `_`  
+  ```elixir
+  iex(2)> [head | _] = [1,2,3]
+  #[1, 2, 3]
+  iex(3)> head
+  #1
+  ```
+  - the variable `_` is special, it can never be ready from, trying to read it give a compile error
+  ```elixir
+  iex(4)> _
+  ** (CompileError) iex:4: invalid use of _. "_" represents a value to be ignored in a pattern and cannot be used in expressions
+  ```
+  - you cannot make function calls on the left side of a match.
+  ```elixir
+  iex(4)> length([1,2,3]) = 3
+  ** (CompileError) iex:4: cannot invoke remote function :erlang.length/1 inside a match
+  ```
+## case, cond and if 
+### case
+  - `case` allows us to compare a value against many patterns until we find a matching one
+  ```elixir
+  iex(1)> case {1,2,3} do
+  ...(1)>   {4,5,6} ->
+  ...(1)>     "this clause won't match"
+  ...(1)>   {1,x,3} ->
+  ...(1)>     "this clause will match and bind x to 2"       
+  ...(1)>   _ ->
+  ...(1)>     "this clause will match any value"
+  ...(1)> end
+  #warning: variable "x" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  #"this clause will match and bind x to 2"
+  ```
+  - you can also pattern match against an existing variable using the `^` pinning operator.  
+  ```elixir
+  iex(2)> case  {1,2,3} do
+  ...(2)>   {1, x, 3} when x > 0 ->
+  ...(2)>     "Will match"
+  ...(2)> _ ->
+  ...(2)>   "Would match, if guard condition were not satisfied" 
+  ...(2)> end
+  #"Will match"
+  ```
+  - the above will only match if `x` is positive
+  - if no clauses are matched an error is raised.
+  
+### cond
+  - `cond` checks different conditions and finds the first one that does not evaluate to `nil` or `false`.
+  ```elixir
+  iex(3)> cond do
+  ...(3)>   2 + 2 == 5 ->
+  ...(3)>     "this will not be true"
+  ...(3)>   2 * 3 == 3 ->
+  ...(3)>     "nor this"             
+  ...(3)>   1 + 1 == 2 ->
+  ...(3)>     "but this will be"
+  ...(3)> end 
+  #"but this will be"
+  ```
+ 
