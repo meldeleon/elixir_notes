@@ -353,5 +353,85 @@
   ...(1)> end 
   #"this will"
   ```
-  - if a variable is declared or changed inside of an `if`, `case` constructu, the declaration and change is only visible inside the construct.
+  - if a variable is declared or changed inside of an `if`, `case` construct, the declaration and change is only visible inside the construct.
+  ```elixir
+  iex(1)> x=1           
+  1
+  iex(2)> x = if true do
+  ...(2)>   x+1
+  ...(2)> else
+  ...(2)>   x
+  ...(2)> end
+  2
+  ```
+## Anonymous Function
+  - Anonymous functions allow us to store and pass executable code as if it was an int or string.
+### Defining anonymous functions
+  - Anon functions are delimited by the keywords `fn` and `end`
+  ```elixir
+  iex(3)> add  = fn a,b -> a + b end
+  #Function<43.65746770/2 in :erl_eval.expr/5>
+  iex(4)> add.(1,2)
+  #3
+  iex(5)> is_function(add)
+  #true
+  ```
+  - We can invoke anon function with a `.()`, and pass arguments to it within the parentheses.
+  - The dot makes it clear you are calling an anon function stored in a variable, and not calling a function named `add/2`
+  - the arity of an anon function matters -- we can check its arity by calling `is_function()` such as in the following:
+  ```elixir
+  iex(6)> is_function(add, 2)
+  true
+  iex(7)> is_function(add, 1)
+  false
+  ```
+### Closure
+  - A closure is an anon function that uses variable defined in its scope.
+  ```elixir
+  iex(8)> double = fn a -> add.(a, a) end
+  #Function<44.65746770/1 in :erl_eval.expr/5>
+  iex(9)> double.(2)
+  #4
+  ```
+  - A var assigned inside a func does not affect its surrounding enivornments.
+
+### Classes and Guards
+  - you can pattern match on the args of anon functions and define multiple clauses and guards:
+  ```elixir
+  iex(10)> f = fn 
+  ...(10)>   x, y when x > 0 -> x + y
+  ...(10)>   x, y -> x * y
+  ...(10)> end
+  #Function<43.65746770/2 in :erl_eval.expr/5>
+  iex(11)> f.(1, 3)
+  #4
+  iex(12)> f.(-1, 3)
+  #-3
+  ```
+  - clauses must have the same arguments in each clause or it will throw an error.
+
+### The capture operator
+  - the `name/arity` notation can be used to capture an existing function into a data-type that we can pass around, similar to how anonymous functions behave.
+  ```elixir
+  iex(13)> fun = &is_atom/1
+  #&:erlang.is_atom/1
+  iex(14)> is_function(fun)
+  #true
+  iex(15)> fun.(:hello)
+  #true
+  iex(16)> fun.(123)
+  #false
+  ```
+  - We can also capture functions defined in modules
+  ```elixir
+  iex(17)> add = &+/2
+  #&:erlang.+/2
+  iex(18)> add.(1,2)
+  #3
+  ```
+  - The capture syntax can also be used as shortcut for creating functions. Useful for functions that wrap existing function/operators.
+
+
+ 
+
 
