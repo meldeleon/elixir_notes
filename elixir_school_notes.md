@@ -431,6 +431,26 @@
   ```
   - The capture syntax can also be used as shortcut for creating functions. Useful for functions that wrap existing function/operators.
 
+## Binaries, strings and charlists
+  - strings in elixir are represented internally by contiguous sequences of bytes known as binaries.
+  - you can use `is_binary/1` function for checks.
+  ```elixir
+  iex(20)> string = "leostera"
+  #"leostera"
+  iex(21)> is_binary(string)
+  #true
+  ```
+### Unicode and Code Points
+  - The unicode standard acts as an official registry of all the characters we know, from classical text to emojis and formatting characters.
+  - These are stored in code charts and each character is given an unique numerical index, known as a code point.
+  - In elixir you can use a `?` in front of the characters in its repertoire 
+  ```elixir
+  iex(22)> ?a
+  #97
+  iex(23)> ?ł
+  #322
+  ```
+  - 
 
  
 
