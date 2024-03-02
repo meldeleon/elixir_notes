@@ -450,8 +450,90 @@
   iex(23)> ?ł
   #322
   ```
-  - 
+  - Most unicode charts will refer to a code point by its hexidecimal representation.
+  ```elixir
+  iex(1)> "\u0061" == "a"
+  #true
+  iex(2)> 0x0061 = 97 = ?a
+  #97
+  ```
+### UTF-8 and Encodings
+  - Codes points are what store, and encoding deals with how we store it/encoding is an implementation. We need some mechanis to convert the code point number into bytes so they can be stored in memory/written to disk, etc.
+  - Elixir uses UTF-8 to encode its strings, which measn that the code points are encoded as a series of 8-bit bytes. It is a variable width characters encoding that uses 1-4 bytes to store each code point.
+  ```elixir
+  iex(2)> String.length(string)
+  #5
+  iex(3)> byte_size(string)
+  #6
+  ```
+  - UTF-8 also provides a notion of graphemes. 
+  - In order to see the exact bytes that a string would be stored in file, a common trick is to concat a null byte `<<0>>`, or by using `IO.inspect/2`
+  ```elixir
+  iex(4)> "hełło" <> <<0>>        
+  #<<104, 101, 197, 130, 197, 130, 111, 0>>
+  iex(5)> IO.inspect("hełło", binaries: :as_binaries)
+  #<<104, 101, 197, 130, 197, 130, 111>>
+  "hełło"
+  ```
+### Bitstrings
+  - A bitstring is a fundamental data type in ELixir, denoted with `<<>>/1` syntax. A bitsring is a contiguous sequence of bits in memory.
+  - By default, 8 bits (1 byte) is used to store each number,but you can manually specify the number bits via `::n` modifier to denote the size on `n` bits, or you can use the more verbose declaration `::size(n)`:
+  ```elixir
+  iex(6)> <<42>>  == <<42::8>>
+  #true
+  iex(7)> <<3::4>>
+  #<<3::size(4)>>
+  ```
 
- 
+### Binaries
+  - A binary is a bitstring where the number of bits is divisible by 8. Every binary is a bitstring, but not every bitstring is a binary. We uise the `is_bitstring/1` and `is_binary/1` functions to demonstrate this?
+  ```elixir
+  iex(1)> is_bitstring(<<3::4>>) 
+  #true
+  iex(2)> is_binary(<<3::4>>)
+  #false
+  iex(3)> is_bitstring(<<0, 255, 42>>)
+  #true
+  iex(4)> is_binary(<<0, 255, 42>>)
+  #true
+  iex(5)> is_binary(<<42::16>>)
+  #true
+  ```
+  - We can pattern match on binaries/bitstrings
+  ```elixir
+  iex(6)> <<0,1,x>> = <<0, 1, 2>>
+  #<<0, 1, 2>>
+  iex(7)> x
+  #2
+  iex(8)> <<0,1,x>> = <<0,1,2,3>>
+  # ** (MatchError) no match of right hand side value: <<0, 1, 2, 3>>
+  ```
+  - The string concatenation operatore `<>` is actually as binary concatenation operator
+  ```elixir
+  iex(8)> "a" <> "ha"
+  #"aha"
+  iex(9)> << 0,1>> <> <<2,3>>
+  #<<0, 1, 2, 3>>
+  ```
+  - Given that strings are binaries, we can also pattern match on strings
+  ```elixir
+  iex(10)> <<head, rest::binary>> = "banana"
+  "banana"
+  iex(11)> head == ?b
+  true
+  iex(12)> rest
+  "anana"
+  ```
 
+### Charlists
+  - A charlist is a list of integers where all the integers are valid code points.
+  ```elixir
+  iex(13)> ~c"hello"
+  #'hello'
+  iex(14)> [?h, ?e, ?l, ?l, ?o]
+  #'hello'
+  ```
+  - the `~c` sigil indicates the fact that we are dealing with a charlist and not a regular string.
+  - `to_string/1` and `to_charlist/1` are functions that convert anything to strings and charlists respectively.
 
+## Keyword lists and maps
