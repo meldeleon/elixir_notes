@@ -537,3 +537,17 @@
   - `to_string/1` and `to_charlist/1` are functions that convert anything to strings and charlists respectively.
 
 ## Keyword lists and maps
+  - Elixir has two different associative structues -- keyword lists and maps.
+
+### Keyword lists
+  - Keyword lists are a data-strucutre used to pass options to functions. Example: There exists a string of numbers we'd like to split, but there is an additional space between the numbers
+  ```elixir
+  iex(1)> String.split("1 2 3", " ", [trim: true]) 
+  #["1", "2", "3"]
+  iex(2)> String.split("1 2 3", " ", trim: true)   
+  #["1", "2", "3"]
+  ```
+  - In the example above, `[trim: true]` is a keyword list, when a keyword list is the last arg of a function, we can even skip the brqckets.
+  - Keyword lists are mostly used as optional arguments to functions.
+  - They are lists that containing two 
+
