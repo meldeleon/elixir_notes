@@ -535,6 +535,16 @@
   ```
   - the `~c` sigil indicates the fact that we are dealing with a charlist and not a regular string.
   - `to_string/1` and `to_charlist/1` are functions that convert anything to strings and charlists respectively.
+  - This may lead to surprising behavior. For example if you are storing a list of integers that happen to range between 0, 127, by default the REPL will interpret this as a charlist.
+  ```elixir
+  iex(5)> hbpm =  [99, 97, 116]                  
+  'cat'
+  ```
+  - You can always force charlists to be printed in their list representation by calling the `inspect/2` function
+  ```elixir
+  iex(6)> inspect(hbpm, charlists: :as_list)
+  "[99, 97, 116]"
+  ```
 
 ## Keyword lists and maps
   - Elixir has two different associative structues -- keyword lists and maps.
@@ -549,5 +559,97 @@
   ```
   - In the example above, `[trim: true]` is a keyword list, when a keyword list is the last arg of a function, we can even skip the brqckets.
   - Keyword lists are mostly used as optional arguments to functions.
-  - They are lists that containing two 
+  - They are lists that containing two item tuples, where the first element (the key) is an atom, and the second element can be any value.
+  - Since keyword lists are lists, you use all operations available to lists.
+  ```elixir
+  iex(7)> list = [a: 1, b: 2]
+  [a: 1, b: 2]
+  iex(8)> list ++
+  ...(8)> [c: 3]
+  [a: 1, b: 2, c: 3]
+  iex(9)> [a: 0] ++ list
+  [a: 0, a: 1, b: 2]
+  ```
+  - You can have duplicate keys in a keyword list, the left most value is retrieved when fetched.
+  - Keyword lists are important because they have 3 special characteristics
+  1. Keys must be atoms.
+  1. Keys are ordered, as specified by the developer.
+  1. Keys can be given more than once.
+  - Do not pattern match on keyword lists.
+ 
+### `do`-blocks and keywords
+  - `do` block are nothing more than a syntax convenience on top of keywords, for example:
+  ```elixir
+  iex(1)> if true do
+  ...(1)>   "This will be seen"
+  ...(1)> else 
+  ...(1)>   "This won't"
+  ...(1)> end
+  "This will be seen"
+  ``` can be rewritten to
+  ```elixir
+  iex(2)> if true, do: "This will be seen", else: "This wont'"
+  "This will be seen"
+  ```
+## Maps as key-value pairs
+  - maps are the go to structure for key-value pairs. A map is created, using the `%{}` syntax:
+  ```elixir
+  iex(8)> map = %{:a => 1, 2 => :b}
+  {2 => :b, :a => 1}
+  ex(9)> map[:a]
+  
+  ex(10)> map[2]
+  b
+  ex(11)> map[:c]
+  nil
+  ```
+  - Maps allow any values as a key.
+  - Maps' keys do not follow any ordering.
+  - Maps are very useful for pattern matching. WHen a map is used in a pattern, it will always match on a subset of the given value.
+  ```elixir
+  iex(13)> %{:a => a} = %{:a => 1, 2 => :b}
+  %{2 => :b, :a => 1}
+  iex(14)> a
+  1
+  iex(15)> %{:c => c} = %{:a => 1, 2 => :b}
+  ** (MatchError) no match of right hand side value: %{2 => :b, :a => 1}
+  ```
+  - a map matches as long as the keys in the pattern exist, therfore an empty map matches all maps.
+  - the `Map` module has a very similar API to the `Keyword` module, with functions to add, remove, and update maps keys.
+  ```elixir
+  iex(1)> butts = %{:a => 1, 2 => :b} 
+  %{2 => :b, :a => 1}
+  iex(2)> Map.get(butts, :a)
+  1
+  iex(3)> Map.put(butts, :c, 3)
+  %{2 => :b, :a => 1, :c => 3} 
+  iex(4)> Map.to_list(butts) 
+  [{2, :b}, {:a, 1}]
+  ```
+### Maps of predefined Keys
+  - It is common to create maps with pre-defined keys, their values may be updated but new keys are never added nor removed. This is useful when we know the shape of data we are working with -- and getting a different key likely means there was an error elsewhere.
+  - We can define this with the same `%{}` syntax, but all the keys must be atoms.
+  ```elixir
+  iex(2)> butts = %{name: "John", age: 23}
+  %{age: 23, name: "John"}
+  iex(3)> butts.name 
+  "John"
+  iex(4)> butts.agee
+  ** (KeyError) key :agee not found in: %{age: 23, name: "John"}. Did you mean one of:
+   * :age
+  ```
+  - there is a syntax for updating keys which raises if the key has not yet been defined.
+  ```elixir
+  iex(1)> butts = %{name: "John", age: 23}
+  %{age: 23, name: "John"}
+  iex(2)> %{butts | name: "Mary"}
+  %{age: 23, name: "Mary"}
+  iex(3)> %{butts | agee: 27}
+  ** (KeyError) key :agee not found in: %{age: 23, name: "John"}. Did you mean one of:
+    * :age
+  ```
+ 
+ 
+
+  
 
