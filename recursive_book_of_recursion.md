@@ -294,4 +294,41 @@ console.log(fibonacci(10))
 
 ### Converting a Recursive Algorithm into an Iterative Algorithm
 
-- Converting a recursive algo to iterative is always possible. Recursive function repeat a calculation by calling themselves, but this repetition can be performed instead by a loop. Recursive functions also make use of the call stack, however, an iterative algo can replace this witha. stack data structure. Thus any recursive algo can be performed iteratively using a loop and stack.z
+- Converting a recursive algo to iterative is always possible. Recursive function repeat a calculation by calling themselves, but this repetition can be performed instead by a loop. Recursive functions also make use of the call stack, however, an iterative algo can replace this witha. stack data structure. Thus any recursive algo can be performed iteratively using a loop and stack.
+
+```js
+//emulating a recursive factorial function using iteration
+let callStack = [] //explicit call stack which will hold frame objects.
+callStack.push(
+    {"returnAddr": "start", 
+    "number": 5
+}) // "call" the "factorial"
+
+let returnValue
+
+while (callStack.length > 0) {
+// the body the "factorial() function"    
+    let n = callStack[callStack.length - 1]["n"]
+    let returnAddr = callStack[callStack.length-1]["returnAddr"]
+
+    if (returnAddr == "start"){
+        if (number === 1) {
+            //BASE CASE
+            returnValue = 1;
+            callStack.pop() // "Return" from "function call"
+            continue
+        } else {
+            //RECURSIVE CASE
+            callStack[callStack.length-1]["returnAddr"] = "after recursive call"
+            //"Call" the "factorial() function"
+            callStack.push({"returnAddr": "start", "number" : number-1})
+            continue
+        } 
+    } else if (returnAddr == "after recursive call") {
+        returnValue = number * returnValue
+        callStack.pop() // "Return from function call."
+    }
+}
+```
+- notice the program doesn't have any functions at all. The program emulated recursive function calls by using a a list as a stack data structures
+- 
