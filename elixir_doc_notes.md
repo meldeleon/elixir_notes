@@ -627,7 +627,7 @@
   [{2, :b}, {:a, 1}]
   ```
 ### Maps of predefined Keys
-  - It is common to create maps with pre-defined keys, their values may be updated but new keys are never added nor removed. This is useful when we know the shape of data we are working with -- and getting a different key likely means there was an error elsewhere.
+  - It is common to create maps with pre-defined keys, their values may be updated but new keys are never added nor removed. This is useful when we know the shape of data we are working with -- and getting a different keys likely means there was an error elsewhere.
   - We can define this with the same `%{}` syntax, but all the keys must be atoms.
   ```elixir
   iex(2)> butts = %{name: "John", age: 23}
@@ -648,8 +648,85 @@
   ** (KeyError) key :agee not found in: %{age: 23, name: "John"}. Did you mean one of:
     * :age
   ```
- 
- 
+  - These operations have one large benefit: they raise an error if the key does not exist in the map and the compiler may even detect/warn. 
+  - Elixir devs generally prefer to use `map.key` syntax/pattern matching instead of using functions in `Map` module.
 
-  
+### Nested data structures
+  - often maps and keyword lists will exist inside maps.
+  - functions for manipulating nested data structures `put_in/2`, `update_in/2`
+  - Take the following example:
+  ```elixir
+  iex(1)> users = [                                           
+...(1)>   ryan: %{name: "Ryan", age: 42, languages: [       
+...(1)> "Erlang", "Elixir", "Bash"]},                       
+...(1)>   leo: %{name: "Leo", age: 34, languages: [ "Erlang", "Elixir", "OCaMel"]}
+...(1)> ]
+[
+  ryan: %{
+    age: 42,
+    languages: ["Erlang", "Elixir", "Bash"],
+    name: "Ryan"
+  },
+  leo: %{
+    age: 34,
+    languages: ["Erlang", "Elixir", "OCaMel"],
+    name: "Leo"
+  }
+]
+  ```
+  - we can use the same syntax for updating the value:
+  ```elixir
+  iex(3)> users = put_in users[:leo].age, 32
+  [
+    ryan: %{
+      age: 42,
+      languages: ["Erlang", "Elixir", "Bash"],
+      name: "Ryan"
+    },
+    leo: %{
+      age: 32,
+      languages: ["Erlang", "Elixir", "OCaMel"],
+      name: "Leo"
+    }
+  ]
+  ```
+  - the `update_in/2` macro is similarl but it allows us to pass a function that controls how the value changes, for example, let's remove "OCaMel" from Leo's list of liked languages:
+  ```elixir
+    iex(4)> users  = update_in users[:leo].languages, fn languages -> List.delete(languages, "OCaMel") end 
+    [ 
+      ryan: %{ age: 42, languages: ["Erlang", "Elixir", "Bash"], name: "Ryan"
+    },
+    leo: %{age: 32, languages: ["Erlang", "Elixir"], name: "Leo"  }
+  ]
+  ```
+  - There are additional macros such as `get_and_update_in/2` that allows us to extract a value and update the data structure at the same time. There also exists `put_in/3`, `update_in/3`, `get_and_update_in/3`. 
+  - Key takeaways:
+    1. Use keyword lists for passing optional values to functions.
+    1. Use maps for general key-value data structures
+    1. Use maps when working with data that has a predefined set of keys.
 
+## Modules and Functions
+  - In order to create our own modules, we use the `defmodule` macro. The first letter of the module must be uppercase, and we use the `def` macro to define functions in that modules, the first letter of functions must be lowercase or underscore.
+  ```elixir
+  iex(6)> defmodule Math do
+  ...(6)>   def sum(a,b) do 
+  ...(6)>     a+b
+  ...(6)>   end
+  ...(6)> end
+  {:module, Math,
+  <<70, 79, 82, 49, 0, 0, 4, 232, 66, 69, 65, 77, 65, 116, 85,
+     56, 0, 0, 0, 136, 0, 0, 0, 15, 11, 69, 108, 105, 120, 105,
+     114, 46, 77, 97, 116, 104, 8, 95, 95, 105, 110, 102, 111,
+    95, 95, 10, 97, ...>>, {:sum, 2}}
+  iex(7)> Math.sum(1,2)
+  3
+  ```
+## Compilation
+  - We can create elixir files to be compiled using the `.ex` extension. We can compile this file using the terminal command `elixirc`
+  - This will generate a file named `Elixir.Math.beam` containing the bytecode for the defined module. Then when we run the REPL in that directory, our module definition will then be available.
+  - Elixir projects, are generally separated into `_build`, `lib` and `test` directories. 
+  - In the future, the `mix` build tool will handle compiling and path set up. 
+
+## Scripting Mode
+  - In addition to the Elixir file extension, `.ex`, there is `.exs` files for scripting.
+.
