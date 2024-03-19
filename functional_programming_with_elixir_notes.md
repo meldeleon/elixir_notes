@@ -256,3 +256,43 @@ Implemented protocols
     iex(18)> head == ?m
     true
     ```
+- Pattern matching is very powerful and everywhere in Elixir
+  ```elixir
+  iex(1)> name = "Mel"
+  "Mel"
+  iex(2)> <<"M", rest::binary>> = name
+  "Mel"
+  iex(3)> rest
+  "el"
+  ```
+  ```elixir
+  iex(2)> <<head::binary-size(2), rest::binary>> = name
+  "Mel"
+  iex(3)> rest
+  "l"
+  iex(4)> head 
+  "Me"
+  ```
+## Charlist
+- Created by using single quotes.
+  ```elixir
+  iex(2)> chars = 'Mel'
+  'Mel'
+  iex(3)> i chars
+  Term
+    'Mel'
+  Data type
+   List
+  Description
+    This is a list of integers that is printed as a sequence of characters
+    delimited by single quotes because all the integers in it represent printable
+    ASCII characters. Conventionally, a list of Unicode code points is known as a
+    charlist and a list of ASCII characters is a subset of it.
+  Raw representation
+    [77, 101, 108]
+  Reference modules
+    List
+  Implemented protocols
+    Collectable, Enumerable, IEx.Info, Inspect, List.Chars, String.Chars     
+  ```
+- 
