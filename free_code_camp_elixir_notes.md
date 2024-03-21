@@ -20,4 +20,9 @@
 - We don't have for loops -- because data is immutable.
 - Elixir has a much better way of doing loops: recursion.
 - Simply put -- recursion is doing the same task over and over again.
-- 
+- Recursive mutation - 
+
+
+945311
+
+logged_in_hw_per_device

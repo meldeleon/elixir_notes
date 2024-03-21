@@ -6,10 +6,10 @@
 a = 1
 ```
 - You would say 1 is assigned to a variable named `a`
-- instead in this case, `=` is a match operator. You are asserting that the two sides are equal. It is more similar to algebra.
+- Instead in this case, `=` is a match operator. You are asserting that the two sides are equal. It is more similar to algebra.
 - `1=a` should also be true
 - Left Hand Side = Right Hand Side (LHS = RHS)
-- elixir ships with a REPL type `iex` in your terminal to access it. Type `clear`to clear the terminal.
+- Elixir ships with a REPL type `iex` in your terminal to access it. Type `clear`to clear the terminal.
 ```elixir
 iex(9)> a = 1
 1
@@ -50,7 +50,7 @@ iex(25)> a = 2
 2
 ```
 - Why does the above work? You can rebind values to variables if the left hand side is a variable, elixir will assume this is waht you want.
-- if you use the pin operator `^` you can force a pattern match for a LHS variable
+- If you use the pin operator `^` you can force a pattern match for a LHS variable
 ```elixir
 iex(30)> a = 1
 1
@@ -65,7 +65,7 @@ iex(33)> 2 = a
     (stdlib 5.2) erl_eval.erl:498: :erl_eval.expr/6
     iex:33: (file)
 ```
-- immutability helps in scalability -- since our data is immutable it can be copied across many different processes, and we don't have to worry about other processes trying to mutate our data.
+- Immutability helps in scalability -- since our data is immutable it can be copied across many different processes, and we don't have to worry about other processes trying to mutate our data.
 
 ## Actor Model
 
@@ -87,10 +87,10 @@ iex(33)> self
 ```
 
 ## Hello World
-- script files takes .exs extensions
-- compiled files are .ex
-- all of the code inside elixir stays inside its modules.
-- for convention, the file name and module name must be the same.
+- Script files takes .exs extensions
+- Compiled files are .ex
+- All of the code inside elixir stays inside its modules.
+- For convention, the file name and module name must be the same.
 
 ```elixir
 #hello.exs
@@ -103,10 +103,10 @@ defmodule Hello do
 end
 Hello.world()
 ```
-- elixir is a compiled language. scripts are generall used for internal dev files.
-- you can run scripts by typing `elixir hello.exs` in your terminal
-- you can compile elixir files by typeing `elixirc hello.exs`. Compiling creates a beam file. Normally we will not compile files this way, but instead we will use the mix tool.
-- you can also compile in the elxir repl by using the `c` command.
+- Elixir is a compiled language. scripts are generall used for internal dev files.
+- You can run scripts by typing `elixir hello.exs` in your terminal
+- You can compile elixir files by typeing `elixirc hello.exs`. Compiling creates a beam file. Normally we will not compile files this way, but instead we will use the mix tool.
+- You can also compile in the elxir repl by using the `c` command.
 ```elixir
 iex(1)> c "hello.exs"
     warning: redefining module Hello (current version loaded from Elixir.Hello.beam)
@@ -119,13 +119,13 @@ iex(1)> c "hello.exs"
 Hello Elixir
 [Hello]
 ```
-- once we have the module in memory we can also call the module/function
+- Once we have the module in memory we can also call the module/function
 ```elixir
 iex(2)> Hello.world()
 Hello Elixir
 :ok
 ```
-- we can recomplie using the `r`command
+- We can recomplie using the `r`command
 
 ```elixir
 iex(1)> r Hello
@@ -155,8 +155,8 @@ Hello mel
 
 ## Data Types
 ### Atom
-- takes the format of `:some_name`, or `:"Some Name"`.
-- atoms are symbols -- the value and the name are the same. It would be similar to saying `var nike = nike` => `:nike`
+- Takes the format of `:some_name`, or `:"Some Name"`.
+- Atoms are symbols -- the value and the name are the same. It would be similar to saying `var nike = nike` => `:nike`
 
 ```elixir
 iex(2)> :nike
@@ -203,15 +203,15 @@ Implemented protocols
   Collectable, IEx.Info, Inspect, List.Chars, String.Chars
 ```
 - `i/1` gives you information about a data type.
-- strings are saved as a collection of bytes, thats why the data type is a `BitString`
-- pattern matching with strings. 
+- Strings are saved as a collection of bytes, thats why the data type is a `BitString`
+- Pattern matching with strings. 
     ```elixir
     iex(3)> "M" <> rest  = "Mel"
     "Mel"
     iex(4)> rest
     "el"
     ```
-- you can see the code point representation of any character using the `?` operator
+- You can see the code point representation of any character using the `?` operator
     ```elixir
     iex(5)> i "abc"
     Term
@@ -232,7 +232,7 @@ Implemented protocols
     iex(6)> ?a
     97
     ```
-- you can check if something is a string with `is_binary/1`
+- You can check if something is a string with `is_binary/1`
     ```elixir
     iex(9)> name = "mel"
     "mel"
@@ -273,7 +273,7 @@ Implemented protocols
   iex(4)> head 
   "Me"
   ```
-## Charlist
+### Charlist
 - Created by using single quotes.
   ```elixir
   iex(2)> chars = 'Mel'
@@ -295,4 +295,177 @@ Implemented protocols
   Implemented protocols
     Collectable, Enumerable, IEx.Info, Inspect, List.Chars, String.Chars     
   ```
-- 
+- To concatenate charlists, and any lists use `++` operator
+```elixir
+  iex(1)> chars = 'Mel'
+  ~c"Mel"
+  iex(2)> 'Hello ' ++ chars
+  ~c"Hello Mel"
+  iex(3)> 
+```
+- To see a code point you can use the `?` operator
+```elixir
+  iex(3)> ?a  
+  97
+```
+### Lists
+- The list inside Elixir are actually linked lists. So indexing operations do not work. They are singly linked lists.
+
+```elixir
+iex(6)> list = ["a", "b", "c"]
+["a", "b", "c"]
+iex(7)> list[0]
+** (ArgumentError) the Access module does not support accessing lists by index, got: 0
+
+Accessing a list by index is typically discouraged in Elixir, instead we prefer to use the Enum module to manipulate lists as a whole. If you really must access a list element by index, you can Enum.at/1 or the functions in the List module
+    (elixir 1.16.1) lib/access.ex:334: Access.get/3
+    iex:7: (file)
+```
+- This is because linked lists are recursive by nature. 
+- We work with lists by either using recursive functions, or use in-built modules.
+- `Enum` module: 
+  - `Enum.at(list, 0)` 
+```elixir
+iex(8)> Enum.at(list, 0)
+"a"
+```
+- You can see all functions available in a module by typeing `Enum.` and then hitting `tab` in the REPL.
+- Arity is the number of arguments that a function takes.
+- `h` macro: it stands for helper function. It prints out the documentation for a module or function.
+```elixir
+  iex(9)> h Enum.at
+
+                    def at(enumerable, index, default \\ nil)                    
+
+    @spec at(t(), index(), default()) :: element() | default()
+
+  Finds the element at the given index (zero-based).
+
+  Returns default if index is out of bounds.
+
+  A negative index can be passed, which means the enumerable is enumerated once
+  and the index is counted from the end (for example, -1 finds the last element).
+
+  ## Examples
+
+      iex> Enum.at([2, 4, 6], 0)
+      2
+      
+      iex> Enum.at([2, 4, 6], 2)
+      6
+      
+      iex> Enum.at([2, 4, 6], 4)
+      nil
+      
+      iex> Enum.at([2, 4, 6], 4, :none)
+      :none
+```
+```elixir
+  iex(11)> [first, second, third] = list
+  ["a", "b", "c"]
+  iex(12)> first
+  "a"
+  iex(13)> second
+  "b"
+  iex(14)> third
+  "c"
+```
+- You can use underscores `_` to ignore a binding in pattern matching
+```elixir
+  iex(4)> list = ["a", "b", "c"]
+  ["a", "b", "c"]
+  iex(5)> [_, _, third] = list
+  ["a", "b", "c"]
+  iex(6)> third
+  "c"
+```
+- You can also use the built in functions `hd` and `tl` to return the head and the tail of a function respectively
+
+```elixir
+  iex(8)> list = ["a", "b", "c"]
+  ["a", "b", "c"]
+  iex(9)> hd(list)
+  "a"
+  iex(10)> tl(list)
+  ["b", "c"]
+```
+- You can also use the cons operator `|` to separate the head and tail
+
+```elixir
+  iex(12)> [ h | t] = list
+  ["a", "b", "c"]
+  iex(13)> h
+  "a"
+  iex(14)> t
+  ["b", "c"]
+```
+
+### Tuple
+- Instantiated with the `{}` notation. Data inside the tuple is saved continuously inside of memory. Don't use more that 2/3 elements inside a tuple as it is very expensive to add/remove items from the tuple. use lists for large data sets.
+
+```elixir
+  iex(4)> {a, b}  = {1, 2}
+  {1, 2}
+  iex(5)> {:reply, msg, state} = { :reply, "Mel found!", ["Mel", "Scott", "Tofu"] }
+  {:reply, "Mel found!", ["Mel", "Scott", "Tofu"]}
+  iex(6)> state
+  ["Mel", "Scott", "Tofu"]
+```
+
+### Keyword Lists
+- Keyword lists are lists, but they are a list but inside the lists are key-value pairs.
+```elixir
+  iex(8)> data = [a: 1, b: 2]
+  [a: 1, b: 2]
+  iex(9)> a
+  1
+  iex(10)> b
+  2
+  iex(11)> data
+  [a: 1, b: 2]
+```
+- Key value pairs are acutally saved as tuples.
+```elixir
+  iex(12)> [{:a, 1}] = [a: 1]
+  [a: 1]
+```
+
+### Maps
+- Maps are the "go-to" kv store. They allow keys of any type and are un-ordered. Define maps with `%{}` syntax.
+```elixir
+  iex(1)> my_map = %{a: 1, b: 2, c: 3}
+  %{c: 3, a: 1, b: 2}
+  iex(2)> my_map
+  %{c: 3, a: 1, b: 2}
+  iex(3)> %{a: first, b: second, c: third} = my_map
+  %{c: 3, a: 1, b: 2}
+  iex(4)> second
+  2
+  iex(5)> my_map.a
+  1
+```
+- if the key is not an atom, you need to use the arrow notation:
+```elixir
+  iex(6)> my_map_2 = %{"a" => 1, "b" => 2, "c" => 3 }
+  %{"a" => 1, "b" => 2, "c" => 3}
+  iex(7)> %{"c" => c} = my_map_2
+  %{"a" => 1, "b" => 2, "c" => 3}
+  iex(8)> c
+  3
+```
+- You can use the cons operator to update maps as well.
+```elixir
+  iex(11)> my_map_2 =  %{ my_map_2 | "c" => 4}
+  %{"a" => 1, "b" => 2, "c" => 4}
+  iex(12)> my_map = %{ my_map | c: 4}
+  %{c: 4, a: 1, b: 2}
+```
+
+### Struct
+- In order to create a structure, you need to create a module.
+- Macros: codes that generates other code. `defmodule` and `defstruct` are macros.
+```elixir
+  defmodule User do
+    defstruct :username, :email, :age
+  end
+```  

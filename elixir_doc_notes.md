@@ -72,7 +72,7 @@
   `[head | tail] = list`
  
 ### Tuples
-  - tuples are lioke lists but stored contiguously in memory. This makes accessing their length fast, but modificiation is very expensive; the new tuple must be copied entirely to memory. The are instantiated with `{}`
+  - tuples are like lists but stored contiguously in memory. This makes accessing their length fast, but modificiation is very expensive; the new tuple must be copied entirely to memory. The are instantiated with `{}`
   - `{"neck", "back", "p*ssy", "crack"}`
   - Tuples can be used as a mechanism to return addl info from functions.
 
