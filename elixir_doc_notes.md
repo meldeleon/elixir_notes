@@ -270,9 +270,9 @@
   - if a variable is mention more than once in a pattern, all references must bind to the same value
   ```elixir
   iex(1)> {x,x} = {1,1} 
-  {1, 1}
   iex(2)> {x,x} = {1,2}
   ** (MatchError) no match of right hand side value: {1, 2}
+  {1, 1}
   ```
   - if we generall do not care about a particular value in a pattern, we can bind it to `_`  
   ```elixir
@@ -721,12 +721,132 @@
   iex(7)> Math.sum(1,2)
   3
   ```
-## Compilation
+### Compilation
   - We can create elixir files to be compiled using the `.ex` extension. We can compile this file using the terminal command `elixirc`
   - This will generate a file named `Elixir.Math.beam` containing the bytecode for the defined module. Then when we run the REPL in that directory, our module definition will then be available.
   - Elixir projects, are generally separated into `_build`, `lib` and `test` directories. 
-  - In the future, the `mix` build tool will handle compiling and path set up. 
+  - In the future, the `mix` build tool will handle compiling and path set up for us. 
 
-## Scripting Mode
+### Scripting Mode
   - In addition to the Elixir file extension, `.ex`, there is `.exs` files for scripting.
-.
+  - To run scripts from the terminal use the `elixir` terminal commands, to run scripts from the REPL, use `c "file_name.exs"`
+  ```elixir
+  defmodule Math do
+    def sum(a, b) do
+      a + b
+    end
+  end
+
+  IO.puts Math.sum(1, 2)
+  ```
+  - to execute in terminal: 
+  ```
+  $ elixir math.exs
+  489
+  ```
+
+### Function definition.
+  - Within a module, we define functions using `def/2` and private functions using `defp/2`. A function can be invoked from other modules, while a private function can only be invoked locally.
+
+  ```elixir
+  defmodule Math do
+    def sum(a, b) do
+      do_sum(a, b)
+    end
+
+    defp do_sum(a, b) do
+      a + b
+    end
+  end
+
+  IO.puts Math.sum(1, 2)    #=> 3
+  IO.puts Math.do_sum(1, 2) #=> ** (UndefinedFunctionError)
+  ```
+  - function declarations supporets guards and multiple clauses. If a function has multiple clauses, it will try each clause until it finds a match. Here is an example:
+
+  ```elixir
+  defmodule Math do
+    def zero?(0) do
+      true
+    end
+
+    def zero?(x) when is_integer(x) do
+      false
+    end
+  end
+
+  IO.puts Math.zero?(0)  #=> true
+  IO.puts Math.zero?(1)  #=> false
+  IO.puts Math.zero?([1, 2, 3]) #=> ** (FunctionClauseError)
+  IO.puts Math.zero(0.0) #=> ** (FunctionClauseError)
+  ```
+  - note on `?` this is a naming convention to indicate that the funciton returns a boolean.
+  - if an argument does not match any of the clauses, this will raise a clause error.
+  - `do:` can be used for one liners but multiple lines must be handled in `do` blocks. For example the above can be rewritten as the following
+
+  ```elixir
+  defmodule Math do
+    def zero?(0) do: true
+    def zero?(0) when is_integer(x), do: false
+  end
+  ```
+
+### Default arguments
+  - function defs support default args
+
+  ```elixir
+  defmodule Concat do
+    def join(a, b, c, d, sep \\ ", my ") do
+      a <> sep <> b <> sep <> c <> sep <> d
+    end
+  end
+
+  IO.puts Concat.join("my neck", "back", "pussy", "crack") #=> my neck, my back, my pussy, my crack
+  IO.puts Concat.join("neck", "back", "pussy", "crack", ", ")  #=> neck, back, pussy, crack
+  ```
+  - Any expression is allowed to serve as a default value, but will only be evaluated when the function is invoked and a default value is necessary.
+  - If a function  with default values has multiple clauses, you need to create dunction head for declaring defaults.
+  ```elixir 
+  defmodule Concat do
+    # A function head declaring defaults
+    def join(a, b \\ nil, sep \\ " ")
+    
+    def join(a, b, _sep) when is_nil(b) do
+      a
+    end
+
+    def join(a, b, sep) do
+      a <> sep <> b
+    end
+  end
+
+  IO.puts Concat.join("Hello", "world" ) #=> Hello world
+  IO.puts Concat.join("Hello", "world", "_") #=> Hello_world
+  IO.puts Concat.join("Hello")
+  ```
+## Recursion
+
+## Loops through recursion
+  - Loops in imperative languages mutate a variable i, and in some cases the enumerable you are iterating over etc. Since Elixir data structures are immutable,this method does not work.
+  - Elixir relies on recursion: a function is called recursively until some condition reached (base case). No data is mutated in this process. Example:
+  ```elixir
+  defmodule Recursion do
+    def print_multiple_times(msg, n) when n > 0 do
+      IO.puts(msg)
+      print_multiple_times(msg, n-1)
+    end
+
+    def print_multiple_times(_msg, 0) do
+      :ok
+    end
+  end
+  Recursion.print_multiple_times("Hello!", 3)
+  # Hello
+  # Hello
+  # Hello
+  ```
+  - Similar to `case`, a function may have many clauses. A particular clause is executed when the arguments passed to the function match the clause's argument patterns and its guards evaluate to `true`
+  - In the first three runs of `print_multiple_times/2`, the first clause is invoked because `n>0`, in the last run, it hits the termination clause, because `n=0`, and then it ignores the msg by assigning it to a `_msg` varible, and returns the atom `:ok`
+
+### Reduce & Map Algorithms
+                                                   
