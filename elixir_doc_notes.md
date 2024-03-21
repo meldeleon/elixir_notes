@@ -270,9 +270,9 @@
   - if a variable is mention more than once in a pattern, all references must bind to the same value
   ```elixir
   iex(1)> {x,x} = {1,1} 
-  {1, 1}
   iex(2)> {x,x} = {1,2}
   ** (MatchError) no match of right hand side value: {1, 2}
+  {1, 1}
   ```
   - if we generall do not care about a particular value in a pattern, we can bind it to `_`  
   ```elixir
@@ -824,5 +824,29 @@
   IO.puts Concat.join("Hello", "world", "_") #=> Hello_world
   IO.puts Concat.join("Hello")
   ```
+## Recursion
 
+## Loops through recursion
+  - Loops in imperative languages mutate a variable i, and in some cases the enumerable you are iterating over etc. Since Elixir data structures are immutable,this method does not work.
+  - Elixir relies on recursion: a function is called recursively until some condition reached (base case). No data is mutated in this process. Example:
+  ```elixir
+  defmodule Recursion do
+    def print_multiple_times(msg, n) when n > 0 do
+      IO.puts(msg)
+      print_multiple_times(msg, n-1)
+    end
 
+    def print_multiple_times(_msg, 0) do
+      :ok
+    end
+  end
+  Recursion.print_multiple_times("Hello!", 3)
+  # Hello
+  # Hello
+  # Hello
+  ```
+  - Similar to `case`, a function may have many clauses. A particular clause is executed when the arguments passed to the function match the clause's argument patterns and its guards evaluate to `true`
+  - In the first three runs of `print_multiple_times/2`, the first clause is invoked because `n>0`, in the last run, it hits the termination clause, because `n=0`, and then it ignores the msg by assigning it to a `_msg` varible, and returns the atom `:ok`
+
+### Reduce & Map Algorithms
+                                                   
