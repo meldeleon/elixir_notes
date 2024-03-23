@@ -848,5 +848,59 @@
   - Similar to `case`, a function may have many clauses. A particular clause is executed when the arguments passed to the function match the clause's argument patterns and its guards evaluate to `true`
   - In the first three runs of `print_multiple_times/2`, the first clause is invoked because `n>0`, in the last run, it hits the termination clause, because `n=0`, and then it ignores the msg by assigning it to a `_msg` varible, and returns the atom `:ok`
 
-### Reduce & Map Algorithms
-                                                   
+### Reduce & Map Algorithms                                                   
+```elixir
+defmodule Math do
+  def sum_list([head |  tail], acc) do
+    sum_list(tail, head + acc)
+  end
+
+  def sum_list([], acc) do
+    acc
+  end
+end
+
+IO.puts Math.sum_list([1, 2, 3], 0)
+```
+- The process of taking a list and reducing it down to one value is know as the reduce algo , and its central to FP.
+
+```elixir
+  defmodule Math do
+    def double_each([head | tail]) do
+      [head * 2 | double_each(tail)]
+    end
+
+    def double_each([]) do
+      []
+    end
+  end
+```
+- The process of taking a list and then mapping over it is known as a map algorithm. 
+- The `Enum` module has functions for simplifying the above:
+
+```elixir
+  iex(1)> Enum.reduce([1,2,3], 0, fn x, acc -> x + acc end)
+  6
+  iex(2)> Enum.map([1,2,3], fn x -> x *2 end)
+  [2, 4, 6]
+```
+
+```elixir
+  iex(3)> Enum.reduce([1, 2, 3], &+/2) 
+  6
+  iex(4)> Enum.map([1, 2, 3], &(&1 *2))
+  [2, 4, 6]
+```
+
+## Enumerables
+- `Enum` module provides functions to work with enumerables.
+- `=~` is a contains operator. When the RHS is a string, it checks if LHS contains RHS.
+- Functions in the `Enum` module are limited to enumerating values in data structures. There are more specific modules for data types that might be a better fit for your use cases.
+- Functions in the `Enum` module are polymorphic because they work on multiple data types, speicifcally ones that implement the `Enumerable` protocol.
+
+### Eager vs. Lazy
+- All the functions in then `Enum` modules are eager. Lazy means when you need the value, the value is computed. Eager means all the values are computed immediately.
+
+#### The pipe operator
+- The `|>` takes the output from the expression on the left side and passes it as the first argument to the function call on its right side.
+
