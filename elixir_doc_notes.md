@@ -899,8 +899,30 @@ IO.puts Math.sum_list([1, 2, 3], 0)
 - Functions in the `Enum` module are polymorphic because they work on multiple data types, speicifcally ones that implement the `Enumerable` protocol.
 
 ### Eager vs. Lazy
-- All the functions in then `Enum` modules are eager. Lazy means when you need the value, the value is computed. Eager means all the values are computed immediately.
-
 #### The pipe operator
 - The `|>` takes the output from the expression on the left side and passes it as the first argument to the function call on its right side.
+
+- The below example has a pipeline of operations 00 the first operation creates a list 100,000 items, then we keep
+  ```elixir
+  iex(3)> odd? = fn x -> rem(x, 2) !=0 end
+  #Function<42.105768164/1 in :erl_eval.expr/6>
+  iex(4)> Enum.filter(1..3, odd?)
+  [1, 3]
+  iex(5)> 1..100_000 |> Enum.map(&(&1 *3)) |> Enum.filter(odd?) |> Enum.sum()
+  7500000000
+  ```
+- All the functions in then `Enum` modules are eager. 
+  - In eager evaluation, the entire collection is processed at once, and the result is immediately returned.
+  - Eager evaluation is the defaulty behavior for most Elixir functions that work with collections, such as `Enum.map`, `Enum.filter`, etc.
+  - With eager evalution, all elements of the collection are processed, even if not all of them are needed for the final result. This can lead to inefficiencies, especially with large datasets.
+
+- Lazy means when you need the value, the value is computed.
+
+
+
+
+
+
+### Streams
+- As an alternative `Enum`, Elixir provides `Stream` module which supports lazy operations. 
 
