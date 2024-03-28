@@ -899,10 +899,6 @@ IO.puts Math.sum_list([1, 2, 3], 0)
 - Functions in the `Enum` module are polymorphic because they work on multiple data types, speicifcally ones that implement the `Enumerable` protocol.
 
 ### Eager vs. Lazy
-#### The pipe operator
-- The `|>` takes the output from the expression on the left side and passes it as the first argument to the function call on its right side.
-
-- The below example has a pipeline of operations 00 the first operation creates a list 100,000 items, then we keep
   ```elixir
   iex(3)> odd? = fn x -> rem(x, 2) !=0 end
   #Function<42.105768164/1 in :erl_eval.expr/6>
@@ -911,18 +907,123 @@ IO.puts Math.sum_list([1, 2, 3], 0)
   iex(5)> 1..100_000 |> Enum.map(&(&1 *3)) |> Enum.filter(odd?) |> Enum.sum()
   7500000000
   ```
+The last line in the code above is a pipeline of operations 
+
+#### The pipe operator
+- The `|>` takes the output from the expression on the left side and passes it as the first argument to the function call on its right side.
+
+#### Eager
 - All the functions in then `Enum` modules are eager. 
   - In eager evaluation, the entire collection is processed at once, and the result is immediately returned.
   - Eager evaluation is the defaulty behavior for most Elixir functions that work with collections, such as `Enum.map`, `Enum.filter`, etc.
   - With eager evalution, all elements of the collection are processed, even if not all of them are needed for the final result. This can lead to inefficiencies, especially with large datasets.
 
-- Lazy means when you need the value, the value is computed.
-
-
-
-
+#### Lazy
+- In lazy evaluation, elements of the collection are processed one at a time, and only as needed. This is achieved using streams in Elixir.
+- Lazy evaluation is useful when working with large datasets or when you only need a portion of the processed data.
+- With lazy evaluation, you can chain multiple operations without creating intermediate colelctions, which can lead to more efficient usage and performance.
 
 
 ### Streams
 - As an alternative `Enum`, Elixir provides `Stream` module which supports lazy operations. 
 
+```elixir
+  iex(7)> 1..100_000 |> Stream.map(&(&1 * 3)) |> Stream.filter(odd?) |> Enum.sum()
+  7500000000
+```
+- Streams are lazy, composable enumerables. In the example above `1..100_000 |> Stream.map(&(&1 * 3))` returns a data type, an actual stream that represents the `map` and computation over the range `1..100_000`
+
+```elixir
+  iex(8)> 1..100_000 |> Stream.map(&(&1 * 3))
+  #Stream<[enum: 1..100000, funs: [#Function<48.53678557/1 in Stream.map/2>]]>
+```
+
+- Instead of generating intermediate lists, streams build a series of computations that are invoked only when we pass the underlying stream to the `Enum` module. Streams are useful when working with large, possibly infinite, collections.
+
+- Many functions in the `Stream` module accept any enumerable as an argument and return a stream as a result. It also provides functions for creating streams. For example, `Stream.cycle/1` can be used to create a stream that cycles a given enumberable infinitely. Be careful not to call a function like `Enum.map/2`on such streams, as they would cycle forever.
+
+```elixir
+  iex(10)> stream = Stream.cycle([1, 2, 3])
+  #Function<63.53678557/2 in Stream.unfold/2>
+  iex(11)> Enum.take(stream, 10)
+  [1, 2, 3, 1, 2, 3, 1, 2, 3, 1]
+```
+
+- Another interesting function is `Stream.resource/3` which can be used to wrap around resources, guaranteeing they are opened right before enumeration and closed afterwards, even in the case of failures. For example `File.stream!/1` builds on top of `Stream.resource/3` to stream files.
+
+- `Enum` and `Stream` modules provide a wide range of functions, but you don't have to know all of them by heart. In general being familiar with `Enum.map/2`, `Enum.reduce/3` and other function with either `map` or `reduce` in their names and you will naturally build an inuition around the most important use cases
+
+
+## Processes
+
+- All code reuns insice of processes. Processes are isolate from each other, run concurrent to one another and communicate via message passing. Processes are not only the basis for concurrency in Elixir, they provide the means for building distributed/fault-tolerant programs.
+
+- Processes in Elixir are lightweight in terms of memory and CPU, even compared to threads as used in other languages. Because of this, it is not uncommon to have to have tens or even hundreds/thousands of processes running simultaneously.
+
+### Spawning Processes
+- The primary mechanism for spawning new processes is the `spawn/1` function. It takes a function which it will execute in another process:
+```elixir
+  iex(1)> spawn(fn -> 1 + 2 end)
+  #PID<0.110.0>
+  Process.alive?(v)
+  false
+```
+- `v` is a magic variable that only works in the REPL, it signifies the last thing that was returned.
+- We can retrieve the PID of the current process by calling `self/0`
+
+```elixir
+  iex(8)> self()  
+  #PID<0.109.0>
+```
+
+### Sending and Receiving messages
+- We can send messages to a process with `send/2` and receive `receive/1`
+
+```elixir
+  iex(9)> send(self(), {:hello, "world"})
+  {:hello, "world"}
+  iex(10)> receive do
+  ...(10)>   {:hello, msg} -> msg
+  ...(10)>   {:world, _msg} -> "won't match"
+  ...(10)> end
+  "world"
+```
+- When a message is sent to a process, the message is stored in the process mailbox. The `receive/1` block goes through the curren process mailbox searching for a message that matches any of the given patterns. `recieve/1` supports guards and many clauses, such as `case/2`
+
+- a process that sends a message does not block on `send/2`, it will put a message in the recipients mailbox and continue. A process can send messages to itself. 
+
+- If a there is not matching messages, a current process will wait until a matching message arrives, additionally a timeout can be specified.
+
+```elixir
+  iex(11)> receive do
+  ...(11)>   {:hello, msg} -> msg
+  ...(11)> after
+  ...(11)>   1_000 -> "nothing after 1s"
+  ...(11)> end
+  "nothing after 1s"
+```
+
+```elixir
+  iex(12)> parent = self()
+  #PID<0.109.0>
+  iex(13)> spawn(fn -> send(parent, {:hello, self()}) end)
+  #PID<0.120.0>
+  iex(14)> receive do
+  ...(14)>   {:hello, pid} -> "Got hello from #{inspect pid}"
+  ...(14)> end
+  "Got hello from #PID<0.120.0>"
+```
+
+### Links
+
+- We usually spawn processes as a linked processes.
+
+
+```elixir
+iex(18)> spawn(fn -> raise "oops" end)
+#PID<0.122.0>
+
+17:53:11.235 [error] Process #PID<0.122.0> raised an exception
+** (RuntimeError) oops
+```
+- When a process started with `spawn/1` fails, the spawned process fails -- but the parent process is still running. If we want the failure in one process to propagate 
