@@ -1003,6 +1003,8 @@ The last line in the code above is a pipeline of operations
   "nothing after 1s"
 ```
 
+- Here is an example of a spawned process sending a message to the default REPL process that we have named parent. Once the process is complete, there is message waiting in the parent process mailbox that can be received and used as an argument to a function:
+
 ```elixir
   iex(12)> parent = self()
   #PID<0.109.0>
@@ -1026,4 +1028,87 @@ iex(18)> spawn(fn -> raise "oops" end)
 17:53:11.235 [error] Process #PID<0.122.0> raised an exception
 ** (RuntimeError) oops
 ```
-- When a process started with `spawn/1` fails, the spawned process fails -- but the parent process is still running. If we want the failure in one process to propagate 
+
+- When a process started with `spawn/1` fails, the spawned process fails -- but the parent process is still running. If we want the failure in one process to propagate
+
+- We can spawn a link process by using `spawn_link/1`. If the link process fails, it will propagate the failure to any linked process. In the example below we have spawned a new process that is linked to the REPL shell process that terminate once an error is raised.
+
+```elixir
+  iex(2)> self()
+  #PID<0.110.0>
+  iex(3)> spawn_link(fn -> raise "oops" end)
+  ** #(EXIT from #PID<0.110.0>) shell process exited with reason: an exception was raised:
+      ** (RuntimeError) oops
+          (stdlib 3.17) erl_eval.erl:683: :erl_eval.do_apply/6
+
+  Interactive Elixir (1.12.2) - press Ctrl+C to exit (type h() ENTER for help)
+  iex(1)> 
+  11:23:05.026 [error] Process #PID<0.114.0> raised an exception
+  ** (RuntimeError) oops
+      (stdlib 3.17) erl_eval.erl:683: :erl_eval.do_apply/6
+```
+- 
+
+### Tasks
+- Tasks are built on top of spawn functions, provide more granular error reports/introspection.
+```elixir
+iex(3)> Task.start(fn -> raise "oopsie woopsie" end)
+#{:ok, #PID<0.119.0>}
+iex(4)> 
+11:43:16.030 [error] Task #PID<0.119.0> started from #PID<0.115.0> terminating
+** (RuntimeError) oopsie woopsie
+    (stdlib 3.17) erl_eval.erl:683: :erl_eval.do_apply/6
+    (elixir 1.12.2) lib/task/supervised.ex:90: Task.Supervised.invoke_mfa/2
+    (stdlib 3.17) proc_lib.erl:226: :proc_lib.init_p_do_apply/3
+Function: #Function<45.65746770/0 in :erl_eval.expr/5>
+    Args: []
+```
+- `Task.start/1` and `Task.start_link/1` are comparable to `spawn/1` and `spawn_link/1`, but return `{:ok, pid}` rather than just the PID. `Task` also has `Task.async/1` and `Task.await/1` to ease distribution.
+
+### State
+- State can be handled in a process. We can loop processes infinitely, maintain state and send an receive messages. The example below, is a module that starts new processes that work as key-value store in a file named `kv.exs`
+
+```elixir
+defmodule KV do
+  def start_link do
+    Task.start_link(fn -> loop(%{}) end)
+  end
+
+  defp loop(map) do
+    receive do
+      {:get, key, caller} ->
+        send(caller, Map.get(map, key))
+        loop(map)
+      {:put, key, value} ->
+        loop(Map.put(map, key, value))
+    end
+  end
+end
+```
+- if we import the KV module to IEX, we can try and send a `:get` message, but becasue our process has no messages, a flush will return nil
+
+```elixir
+iex(1)> c "kv.exs"                  
+[KV]
+iex(2)> {:ok, pid} = KV.start_link()
+{:ok, #PID<0.120.0>}
+iex(3)> send(pid, {:get, :hello, self()})
+{:get, :hello, #PID<0.110.0>}
+iex(4)> flush()
+nil
+:ok
+```
+- however in the below examples, when we send a `:put`, we then see a response for our `:get` message, and flushing will return all the messages the process has received.
+
+```elixir
+iex(5)> send(pid, {:put, :hello, :world})
+{:put, :hello, :world}
+iex(6)> send(pid, {:get, :hello, self()})
+{:get, :hello, #PID<0.110.0>}
+iex(7)> flush()
+:world
+:ok
+```
+- Anyone who know the process ID can update this state -- we can also name the process to allow other processes to update this state easier.
+
+
