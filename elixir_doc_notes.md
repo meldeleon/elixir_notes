@@ -1109,6 +1109,109 @@ iex(7)> flush()
 :world
 :ok
 ```
-- Anyone who know the process ID can update this state -- we can also name the process to allow other processes to update this state easier.
+- Anyone who know the process ID can update this state -- we can also name the process to allow other processes to update this state easier:
 
+```elixir
+iex(12)> Process.register(pid, :kv)
+true
+iex(13)> send(pid, {:put, :hello, :world})
+{:put, :hello, :world}
+iex(14)> flush()               
+:ok
+iex(15)> send(pid, {:get, :hello, self()})
+{:get, :hello, #PID<0.110.0>}
+iex(16)> flush()
+:world
+:ok
+```
+- Elixir ships with a number of abstractions around state, like `Agent`s, the code above and be written as:
 
+```elixir
+iex(19)> {:ok, pid} = Agent.start_link(fn -> %{} end)
+{:ok, #PID<0.137.0>}
+iex(20)> Agent.update(pid, fn map -> Map.put(map, :hello, :world) end)
+:ok
+iex(21)> Agent.get(pid, fn map -> Map.get(map, :hello) end)
+:world
+```
+- In the code above, we did not need to define `get` or `update` methods in our `kv.exs` file, since the `Agent` abstraction takes an anon function for its `get` and `update` methods. `Agent.start_link/2` also takes a `:name` which automatically registers 
+
+## IO and the file system
+### The `IO` module
+- usage of the `IO` module is pretty straight forward. Standard input/out is `:stdio`, standard error `:stderr`
+
+```elixir
+iex(28)> IO.puts("hello world")
+hello world
+:ok
+iex(29)> IO.gets("yes or no? ")
+yes or no? yes
+"yes\n"
+```
+- By default, the `IO` module will write to stdio, but we can change that by passing an argument such as `:stderr`
+
+```elixir
+iex(1)> IO.puts(:stderr, "hello world")
+hello world
+:ok
+```
+
+### The `File` module
+
+- The `File` module allows us to open files as IO devices. Files are opened in binary mode, we use `IO.binread/2` and `IO.binwrite/2` function from the `IO` module.
+
+```elixir
+iex(9)> IO.binwrite(file, "butts")
+:ok
+iex(10)> {:ok, file} = File.open("butts.txt", [:write])
+{:ok, #PID<0.127.0>}
+iex(11)> IO.binwrite(file, "butts")                    
+:ok
+iex(12)> File.close(file)
+:ok
+iex(13)> File.read("butts.txt")
+{:ok, "butts"}
+```
+- A file can also be opened with `:utf8` encoding. 
+- `File.rm/1` removes files, `File.mkdir/1` makes directories, `File.mkdir_p/1` will make a directory and it's parent directories.
+- `File.cp_r/2` and `File.rm_rf/1` will respectively copy/remove recursively.
+
+- adding a trailing bang will return just contents instead of the tuple. If there are no contents to return, it will raise an error.
+```elixir
+iex(21)> File.read("butts.txt")
+{:ok, "butts"}
+iex(22)> File.read!("butts.txt")
+"butts"
+iex(23)> File.read!("butts2.txt")
+** (File.Error) could not read file "butts2.txt": no such file or directory
+    (elixir 1.12.2) lib/file.ex:355: File.read!/1
+```
+
+### The `Path` module
+- `Path` module provides methods for working with file paths
+```elixir
+iex(4)> Path.join("butts", "cheeks")
+"butts/cheeks"
+iex(5)> Path.expand("butts")
+"/home/leomeli/elixir_notes/butts"
+```
+
+### Processes
+-The `IO` module works with processes. When you write to file that has been close, you are actually sending a message to a process which has been terminated.
+
+```elixir
+iex(1)> {:ok, file} = File.open("hello", [:write])
+{:ok, #PID<0.112.0>}
+iex(2)> File.close(file)
+:ok
+iex(3)> IO.write(file, "hello?")
+** (ErlangError) Erlang error: :terminated
+    (stdlib 3.17) io.erl:94: :io.put_chars(#PID<0.112.0>, "hello?")
+```
+
+```elixir
+iex(4)> pid = spawn(fn ->         
+...(4)>   receive do: (msg -> IO.inspect(msg))
+...(4)> end)
+#PID<0.127.0>
+```
