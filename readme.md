@@ -1,4 +1,4 @@
-#Elixir Notes
+# Elixir Notes
 
 This is a repository to store notes from Juiceboxhero's Elixir Lang learning live streams.
 

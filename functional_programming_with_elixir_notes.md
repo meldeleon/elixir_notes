@@ -462,6 +462,7 @@ iex(8)> Enum.at(list, 0)
 ```
 
 ### Struct
+- Structs are maps with reduced functionality, compile-time checks, and default values. Reduced functionality means that structs cannot use protocols defined for maps like Enum, but can use functions from the Map module.
 - In order to create a structure, you need to create a module.
 - Macros: codes that generates other code. `defmodule` and `defstruct` are macros.
 ```elixir

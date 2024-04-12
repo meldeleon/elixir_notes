@@ -1215,3 +1215,13 @@ iex(4)> pid = spawn(fn ->
 ...(4)> end)
 #PID<0.127.0>
 ```
+
+### `iodata` and `chardata`
+
+- in the above examples, we used binaries when writing to files. Most of the IO functions in Elixir also accept `iodata` or `chardata`, which can be leveraged for performance.
+
+```elixir
+name = "Mel"
+IO.puts("Hello " <> name <> "!")
+```
+- Since strings in elixir are immutable, the example above will copy the string "Mel" into the new "Hello Mel!" string. Copying can be quiet expensive for large strings. Because of this, 
