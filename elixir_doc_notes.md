@@ -1250,7 +1250,125 @@ require Foo
 # Import functions from Foo so they can be called without `Foo.`
 import Foo
 
-# Invokes the custom code defined in FOo as an extension point.
+# Invokes the custom code defined in Foo as an extension point.
 use Foo
 ```
-- 
+
+### `alias`
+- `alias` directive allows referring to `Math.list` as just `List` within the module definition.
+
+```elixir
+defmodule Stats do
+  alias Math.List, as: List
+  # In the remaining module definition List expands to Math.List.
+end
+```
+- All modules are defined in the main `Elixir` namespace, such as `Elixir.String`. 
+- `alias` is lexically scoped, you can set an alias inside of a specific function in the below the `List` alias will only working in `plus/2` and not in `minus/2`.
+
+```elixir
+defmodule Math do
+  def plus(a,b) do
+    alias Math.List, as List
+  end
+  def minus(a,b) do
+    #..
+  end
+end
+```
+### `require`
+- Elixir has macros for meta-programming, or writing code that generates code. Macros get expanded at compile time. 
+- In order to use macros you need to opt-in by requiring the module they are defined in.
+
+```elixir
+iex(6)> Integer.is_odd(3)
+** (UndefinedFunctionError) function Integer.is_odd/1 is undefined or private. However there is a macro with the same name and arity. Be sure to require Integer if you intend to invoke this macro
+    (elixir 1.12.2) Integer.is_odd(3)
+iex(6)> require Integer 
+Integer
+iex(7)> Integer.is_odd(3)
+true
+```
+- `require` is also lexically scoped. 
+
+### `import` 
+- `import` is used to access public functions from other modules without using the full-qualified name.
+
+```elixir
+iex(9)> import List, only: [duplicate: 2]
+List
+iex(10)> duplicate(:ok, 3)
+[:ok, :ok, :ok]
+```
+- `:only` parameter will prevent importing all functions of a module inside the current scope.
+- `import` is also lexically scoped.
+- dev should generally prefer `alias` over `import` since the syntax of aliase make the origin of the function clearer.
+
+### `use`
+- `use` is often used as an extension point, applying `use` to a module `FooBar`, you are allowing the module to inject any code into the current module, such as importing itself or other modules, defining new functions, setting a module state, etc.
+
+```elixir
+defmodule AssertionTest do
+  use ExUnit.Case, async: true
+
+  test "always pass" do
+    assert true
+  end
+end
+```
+- `use` requires the given module and then calls the `__using__/1` callback on it, which allows a module to inject code. 
+- The general syntax for this looks like:
+```elixir
+defmodule Example do
+  use Feature, option: :value
+end
+```
+- which compiles to the following
+```elixir
+defmodule Example do
+  require Feature
+  Feature.__using__(option: :value)
+end
+```
+- `use` allows any code to run, do we can't know the side-effects of a module without reading tis documentation. do not use `use` where an `import` or `alias` would work fine.
+
+### Understanding ALiases
+- An alias is a capitalized identifier (similar to `String` or `Keyword`), and is converted to an atom during compilation. For example:
+
+```elixir
+iex(2)> is_atom(String)
+true
+iex(3)> to_string(String)
+"Elixir.String"
+iex(4)> :"Elixir.String" == String
+true
+```
+- By using `alias/2` directive, we change the atom the alias expands to. Aliases expand to atoms because in Beam, modules are represented by atoms.
+
+```elixir
+iex(6)> List.flatten([1, [2], 3])
+[1, 2, 3]
+iex(7)> :"Elixir.List".flatten([1, [2], 3])
+[1, 2, 3]
+```
+### Module nesting
+
+- consider:
+
+```elixir
+defmodule Foo do
+  defmodule Bar do
+  end
+end
+```
+- we define two modules `Foo` and `Foo.Bar`. `Foo.Bar` can be accessed as `Bar` within the `Foo` lexical scope. If accessed outside of that it needs to be refrenced by `Foo.Bar`.  
+- you can multi alias/import/require/use with the following syntax:
+
+```elixir
+alias MyApp.{Foo, Bar, Baz}
+```
+- NB: Ryan says don't do this, it's bad `:(` ^. 
+
+
+
+
