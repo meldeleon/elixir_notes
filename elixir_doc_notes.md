@@ -1210,18 +1210,47 @@ iex(3)> IO.write(file, "hello?")
 ```
 
 ```elixir
-iex(4)> pid = spawn(fn ->         
-...(4)>   receive do: (msg -> IO.inspect(msg))
-...(4)> end)
-#PID<0.127.0>
+iex(1)> pid = spawn(fn ->
+...(1)>   receive do: (msg -> IO.inspect(msg))
+...(1)> end)
+#PID<0.114.0>
+iex(2)> IO.write(pid, "hello")
+{:io_request, #PID<0.110.0>, #Reference<0.4120470462.549453825.196101>,
+ {:put_chars, :unicode, "hello"}}
+** (ErlangError) Erlang error: :terminated
+    (stdlib 3.17) io.erl:94: :io.put_chars(#PID<0.114.0>, "hello")
 ```
-
 ### `iodata` and `chardata`
-
-- in the above examples, we used binaries when writing to files. Most of the IO functions in Elixir also accept `iodata` or `chardata`, which can be leveraged for performance.
+- Most IO module functions accept `iodata` or `chardata` for performance reasons.
 
 ```elixir
-name = "Mel"
+name = "Dillon"
 IO.puts("Hello " <> name <> "!")
 ```
-- Since strings in elixir are immutable, the example above will copy the string "Mel" into the new "Hello Mel!" string. Copying can be quiet expensive for large strings. Because of this, 
+- The above will copy the string `name`, which can be expensive for very large strings.
+- Becasue of this IO methods can take a list of strings, aka `iodata` or `chardata`
+
+```elixir
+name = "Dillon"
+IO.puts(["Hello ", name, "!"])
+```
+- `iodata` and `chardata` may also contain integers. This is the primary different between the two -- for `iodata` integers represent bytes; for `chardata` integers represent unicode codepoints. 
+- If a file is opened without encoding, it's assumed to be in `raw mode`, and IO methods will expect `iodata` as an argument (integers will represent bytes).
+
+## alias, require and import
+- There are three directives to facilitate software reuse, `alias`, `require`, `import`, plus one macro `use`
+
+```elixir
+# Alias the module so it can be called as Bar instead of Foo.Bar
+alias Foo.Bar, as: Bar 
+
+# Require the module in order to use its macros
+require Foo
+
+# Import functions from Foo so they can be called without `Foo.`
+import Foo
+
+# Invokes the custom code defined in FOo as an extension point.
+use Foo
+```
+- 
