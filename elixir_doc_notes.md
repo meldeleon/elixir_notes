@@ -1369,6 +1369,73 @@ alias MyApp.{Foo, Bar, Baz}
 ```
 - NB: Ryan says don't do this, it's bad `:(` ^. 
 
+## Module Attributes
+- Modules attributes serve 3 purposes
+  1. They serve to annotate the module, with info to be used by the user or the VM.
+  1. They work as constants.
+  1. They work as a temporary module storage to be used during compilation
 
+### As annoations
+- This is a concept borrowed from erlang. For example:
 
+```elixir
+defmodule MyServer do
+  @moduledoc "My server code."
+end
+```
+- In this example, we are defining the module documentations by using the module attribute syntax. Elixir has a handful of reserved attributes, some commonly used ones:
+  -  `@moduledoc` -- provides documentation for the current module.
+  - `@doc` -- provides documentation for the function or macro that follows the attribute.
+  - `@spec` -- provides the typespec for function that follows the attribute.
+  - `@behaviour` -- used for specifying an OTP or user-defined behaviour.
 
+- `@moduledoc` and `@doc` are by fat the most used attributes. Elixir treats documentation as first-class and provides many function to access docs. 
+
+```elixir
+defmodule Math do
+  @moduledoc """
+  Provides math-related functions
+
+  ## Examples
+    iex > Math.sum(1,2)
+    3
+  """
+  
+  @doc """
+  Calculates the sum of two numbers.
+  """
+  def sum(a, b), do: a + b
+end
+```
+
+- Elixir prefers the use of Markdown with heredocs. Heredocs are multi-line strings, they start and end with triple double-quotes. You can then access the documentation of any compiled module directly of IEx
+- There is also a tool called ExDoc, which used to generate HTML pages from the documentations.
+
+### As "constants"
+- Elixir devs will often use module attributes as constants to make a value more visible/reusable"
+```elixir
+defmodule MyServer do
+  @initial_state %{host: "127.0.0,1", pord: 3456}
+  IO.inspect @initial_state
+end
+```
+- Trying to access an attrubute that was not defined will also print a warning:
+
+```elixir
+iex(1)> defmodule MyServer do
+...(1)>   @unknown
+...(1)> end
+warning: undefined module attribute @unknown, please remove access to @unknown or explicitly set it before access
+└─ iex:2: MyServer (module)
+```
+
+- Attributes can also be read inside functions;
+
+```elixir
+defmodule MyServer do
+  @my_data 14
+  def first_data, do: @my_data
+  @my_data 13
+  def second_data, do: @my_data
+end
+```
