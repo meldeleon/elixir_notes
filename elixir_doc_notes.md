@@ -1419,7 +1419,7 @@ defmodule MyServer do
   IO.inspect @initial_state
 end
 ```
-- Trying to access an attrubute that was not defined will also print a warning:
+- Trying to access an attribute that was not defined will also print a warning:
 
 ```elixir
 iex(1)> defmodule MyServer do
@@ -1437,5 +1437,74 @@ defmodule MyServer do
   def first_data, do: @my_data
   @my_data 13
   def second_data, do: @my_data
+end
+
+MyServer.first_data  #=> 14
+MyServer.second_data #=> 13
+```
+- Functions can be called in the module attribute definition
+
+```elixir
+defmodule MyApp.Status do
+  @service URI.parse("https://example.com")
+  def status(email) do
+    SomeHttpClient.get(@service)
+    end
+  end
+end
+```
+The above example will look like this at compile:
+
+```elixir
+defmodule MyApp.Status do
+  def status(email) do
+    SomeHttpClients.get(%URI{
+      authority: "example.com",
+      host: "example.com",
+      port: 443,
+      scheme: "https"
+    })
+  end
+end
+```
+- Since constants are defined at runtime, if a constant is used in multiple functions, multiple snapshots may be taken of the constant, to prevent this abstract the constant to its own private function.
+So this:
+
+```elixir
+def some_function, do: do_something_with(@example)
+def another_function, do: do_something_else_with(@example)
+```
+
+would have a preferred design pattern of:
+
+```elixir
+def some_function, do: do_something_with(example())
+def another_function, do: do_something_else_with(example())
+defp example, do: @example
+```
+
+### Accumulating attributes
+- You can configure a module attribute so that its values are accumulated:
+
+```elixir
+defmodfule Foo do
+  Module.register_attribute(__MODULE__, :param, accumulate: true)
+
+  @param :foo
+  @param :bar
+  # here @param == [:bar, :foo]
+end
+```
+
+### As temporary storage
+- There is a good example of this in Elixir's unit test framework `ExUnit`
+```elixir
+defmodule MyTest do
+  use ExUnit.Case, async: true
+  @tag :external
+  @tag os: :unix
+  test "contacts external service" do
+    # ...
+  end
 end
 ```
