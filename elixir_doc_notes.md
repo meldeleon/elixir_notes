@@ -1508,3 +1508,49 @@ defmodule MyTest do
   end
 end
 ```
+
+## Structs
+- Structs are extensions built on top of maps, they provide compile-time checks and default values. 
+### Defining Structs
+- `defstruct/1` construct is used:
+
+```elixir 
+iex(1)> defmodule User do
+...(1)>   defstruct name: "Ryan", age: 42
+...(1)> end
+{:module, User,
+ <<70, 79, 82, 49, 0, 0, 6, 212, 66, 69, 65, 77, 65, 116, 85, 56, 0, 0, 0, 193,
+   0, 0, 0, 19, 11, 69, 108, 105, 120, 105, 114, 46, 85, 115, 101, 114, 8, 95,
+   95, 105, 110, 102, 111, 95, 95, 10, 97, ...>>, %User{age: 42, name: "Ryan"}}
+iex(2)> %User{} 
+%User{age: 42, name: "Ryan"}
+iex(3)> %User{name: "Mel", age: 36}
+%User{age: 36, name: "Mel"}
+```
+- Structs have compile-time guarantees that only fields defined in `defstruct/1` will be allowed to exist int he struct
+
+```elixir
+iex(4)> %User{name: "Manny", age: 27, orientation: "mannysexual"}          
+** (KeyError) key :orientation not found
+    expanding struct: User.__struct__/1
+    iex:4: (file)
+```
+- Structs have the same syntax as maps for updating fields of fixed keys.
+
+```elixir
+iex(4)> ryan = %User{}
+%User{age: 42, name: "Ryan"}
+iex(5)> ryan.name
+"Ryan"
+iex(6)> ryan.age
+42
+iex(7)> dillon = %{ryan | name: "Dillon"}  
+%User{age: 42, name: "Dillon"}
+```
+
+- When passing `|`, elixir will not store unlisted keys in memory, so `ryan` and `dillon` will share the same key structure in memory.
+
+
+
+
+
