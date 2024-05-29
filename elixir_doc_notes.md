@@ -1548,9 +1548,96 @@ iex(7)> dillon = %{ryan | name: "Dillon"}
 %User{age: 42, name: "Dillon"}
 ```
 
-- When passing `|`, elixir will not store unlisted keys in memory, so `ryan` and `dillon` will share the same key structure in memory.
+- When passing `|`, elixir will not store unlisted key memory, so `ryan` and `dillon` will share the same key structure in memory.
+- Structs can be used in pattern matching -- for mathcing the value of a specific key or for ensuring a matching value is a struct of the same type.
 
+```elixir
+iex(2)> luu = %User{}
+%User{age: 37, name: "Luu"}
+iex(3)> %User{name: name} = luu
+%User{age: 37, name: "Luu"}
+iex(4)> name
+"Luu"
+iex(5)> %User{} = %{}
+** (MatchError) no match of right hand side value: %{}
+```
 
+### Structs are bare maps underneath
+- Structs are just maps, but they have a special field called "__struct__` that contains the name of the struct.
 
+```elixir
+iex(9)> is_map(luu)   
+true
+iex(10)> luu.__struct__
+User
+```
 
+### Default values and required keys
+- if you don't define a default value, `nil` is assumed.
+```elixir
+iex(11)> defmodule Product do
+...(11)>   defstruct [:name]
+...(11)> end
+{:module, Product,
+ <<70, 79, 82, 49, 0, 0, 6, 188, 66, 69, 65, 77, 65, 116, 85, 56, 0, 0, 0, 196,
+   0, 0, 0, 19, 14, 69, 108, 105, 120, 105, 114, 46, 80, 114, 111, 100, 117, 99,
+   116, 8, 95, 95, 105, 110, 102, 111, 95, ...>>, %Product{name: nil}}
+iex(12)> %Product{}
+%Product{name: nil}
+```
+- you can define a struct with a mix of explicit default values and assumed nil values. but you must list nil fields first.
+
+```elixir
+iex(2)> defmodule User do
+...(2)>   defstruct [:email, name: "luu", age: 37]
+...(2)> end 
+{:module, User,
+ <<70, 79, 82, 49, 0, 0, 6, 216, 66, 69, 65, 77, 65, 116, 85, 56, 0, 0, 0, 193,
+   0, 0, 0, 19, 11, 69, 108, 105, 120, 105, 114, 46, 85, 115, 101, 114, 8, 95,
+   95, 105, 110, 102, 111, 95, 95, 10, 97, ...>>,
+ %User{age: 37, email: nil, name: "luu"}}
+iex(3)> %User{}
+%User{age: 37, email: nil, name: "luu"}
+```
+
+```elixir
+iex(6)> defmodule User do
+...(6)>   defstruct [name: "Luu", age: 37, :email]
+...(6)> end
+** (SyntaxError) iex:7: unexpected expression after keyword list. Keyword lists must always come last in lists and maps. Therefore, this is not allowed:
+
+    [some: :value, :another]
+    %{some: :value, another => value}
+
+Instead, reorder it to be the last entry:
+
+    [:another, some: :value]
+    %{another => value, some: :value}
+
+Syntax error after: ','
+```
+- you can enforce that certain key need to be specified during struct using the `@enforce_keys` module attribute.
+
+```elixir 
+iex(9)> defmodule Car do
+...(9)>   @enforce_keys [:make]
+...(9)>   defstruct [:model, :make]
+...(9)> end 
+warning: redefining module Car (current version defined in memory)
+  iex:9
+ 
+{:module, Car,
+ <<70, 79, 82, 49, 0, 0, 9, 128, 66, 69, 65, 77, 65, 116, 85, 56, 0, 0, 1, 28,
+   0, 0, 0, 28, 10, 69, 108, 105, 120, 105, 114, 46, 67, 97, 114, 8, 95, 95,
+   105, 110, 102, 111, 95, 95, 10, 97, 116, ...>>, %Car{make: nil, model: nil}}
+iex(10)> %Car{}
+** (ArgumentError) the following keys must also be given when building struct Car: [:make]
+    expanding struct: Car.__struct__/1
+    iex:10: (file)
+iex(10)> %Car{make: "nissan"}
+%Car{make: "nissan", model: nil}
+```
+## Protocols
+- Protocols are used to acheive polymorphism, where behavior varies depenidng on the data type. 
+- 
 
